@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>MST con D3.js</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      border: 1px solid #ccc;
+    }
+    line {
+      stroke: #999;
+      stroke-width: 2px;
+    }
+    text {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+    circle {
+      fill: lightgreen;
+      stroke: #333;
+      stroke-width: 1.5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Árbol de Expansión Mínima (Prim)</h2>
+  <svg width="800" height="500"></svg>
+
+  <script>
+    const width = 800;
+    const height = 500;
+
+    d3.json("mst_prim.json").then(data => {
+      const svg = d3.select("svg");
+
+      const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+      const link = svg.selectAll("line")
+        .data(data.links)
+        .enter()
+        .append("line");
+
+      const linkLabel = svg.selectAll(".link-label")
+        .data(data.links)
+        .enter()
+        .append("text")
+        .attr("class", "link-label")
+        .text(d => d.weight);
+
+      const node = svg.selectAll("circle")
+        .data(data.nodes)
+        .enter()
+        .append("circle")
+        .attr("r", 20)
+        .call(drag(simulation));
+
+      const label = svg.selectAll(".node-label")
+        .data(data.nodes)
+        .enter()
+        .append("text")
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .text(d => d.id);
+
+      simulation.on("tick", () => {
+        link
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+
+        linkLabel
+          .attr("x", d => (d.source.x + d.target.x) / 2)
+          .attr("y", d => (d.source.y + d.target.y) / 2);
+
+        node
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+
+        label
+          .attr("x", d => d.x)
+          .attr("y", d => d.y);
+      });
+
+      function drag(simulation) {
+        return d3.drag()
+          .on("start", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on("drag", (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on("end", (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          });
+      }
+    });
+  </script>
+</body>
+</html>
