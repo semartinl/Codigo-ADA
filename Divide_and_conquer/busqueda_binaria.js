@@ -100,7 +100,8 @@ let mitadArray = Math.round(randoArray.length/2)
 
 const orderedArray = MergeSort(randoArray,10)
 console.log(randoArray)
-function generarListaRandom(tamano){
+
+export function generarListaRandom(tamano){
     const lista = []
     for (let i =0; i<tamano; i++){
         let random = Math.round(Math.random()*100)
