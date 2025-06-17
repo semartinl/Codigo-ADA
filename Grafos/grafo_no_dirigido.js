@@ -193,6 +193,42 @@ class GrafoNoDirigido {
         }
         return false
     }
+
+    // cicloHamiltoniano(verticePartida, visitados = new Set(), camino = []) {
+    //     if (!this.adjacentsList.has(verticePartida)) {
+    //         console.log(`El vértice ${verticePartida} no existe.`);
+    //         return [];
+    //     }
+
+    //     visitados.add(verticePartida);
+    //     camino.push(verticePartida);
+
+    //     if (visitados.size === this.vertices.size) {
+    //         // Comprobar si hay un arco de vuelta al vértice de partida
+    //         if (this.adjacentsList.get(verticePartida).has(camino[0])) {
+    //             camino.push(camino[0]); // Añadir el vértice de partida al final del camino
+    //             return camino;
+    //         } else {
+    //             visitados.delete(verticePartida);
+    //             camino.pop();
+    //             return null; // No se encontró un ciclo Hamiltoniano
+    //         }
+    //     }
+
+    //     for (let adyacente of this.obtenerAdyacentes(verticePartida)) {
+    //         if (!visitados.has(adyacente)) {
+    //             const resultado = this.cicloHamiltoniano(adyacente, visitados, camino);
+    //             if (resultado) {
+    //                 return resultado; // Si se encuentra un ciclo, lo devolvemos
+    //             }
+    //         }
+    //     }
+
+    //     visitados.delete(verticePartida);
+    //     camino.pop();
+    //     return []; // No se encontró un ciclo Hamiltoniano
+    // }
+
     esConexo(){
         if (this.isEmpty()) {
             return true; // Un grafo vacío es conexo

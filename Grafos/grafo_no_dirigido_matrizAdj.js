@@ -247,6 +247,32 @@ constructor() {
 
         return Array.from(visitados);
     }
+
+    cicloHamiltoniano(verticePartida, visitados = new Set(), camino = []) {
+        const index = this.vertices.get(verticePartida);
+        visitados.add(verticePartida)
+        camino.push(verticePartida)
+
+        for(let i = 0; i < this.vertices.size; i++){
+            if(this.Adj[verticePartida][i] !== 0 && !visitados.has(i)){
+
+                if(camino.length === this.vertices.size){
+                    if(this.Adj[verticePartida][camino[0]] !== 0){
+                        return camino
+                    }
+                }
+                else{
+                    const resultado = this.cicloHamiltoniano(i, visitados, camino)
+                    if(resultado){
+                        return resultado
+                    }
+                }
+                visitados.delete(i)
+                camino.pop()
+            }
+        }
+        return []
+    }
     esConexo(){
         if (this.isEmpty()) {
             return true; // Un grafo vacío es conexo
@@ -362,12 +388,25 @@ constructor() {
     }
 }
 
-const grafo = new GrafoNoDirigidoMatriz()
-const matrizAdyacencia = grafo.obtenerMatrizAdyacencia()
-grafo.insertarVertice("A")
-grafo.insertarVertice("B")
+const grafo = new GrafoNoDirigidoMatriz();
+
+['A', 'B', 'C', 'D', 'E', 'F'].forEach(vertice => grafo.insertarVertice(vertice));
+
+// Insertamos los arcos con sus pesos
+grafo.insertarArco('A', 'B', 4);
+grafo.insertarArco('A', 'C', 2);
+grafo.insertarArco('A','F', 10)
+grafo.insertarArco('B', 'C', 1);
+grafo.insertarArco('B', 'D', 5);
+grafo.insertarArco('C', 'D', 8);
+grafo.insertarArco('C', 'E', 10);
+grafo.insertarArco('D', 'E', 2);
+grafo.insertarArco('D', 'F', 6);
+grafo.insertarArco('E', 'F', 3);
 
 // grafo.insertarArco("A", "B")
-
-console.log(grafo.obtenerVertices())
-console.log(matrizAdyacencia)
+console.log(grafo.indiceToNombre.get(4))
+const cicloHamiltoniano = grafo.cicloHamiltoniano(0);
+console.log("Ciclo Hamiltoniano:", cicloHamiltoniano);
+console.log(grafo.obtenerMatrizAdyacencia());
+console.log(grafo.obtenerMatrizAdyacencia()[cicloHamiltoniano[0]][cicloHamiltoniano[cicloHamiltoniano.length - 1]] !== 0);
