@@ -181,13 +181,14 @@ class GrafoNoDirigido {
             console.log(`El vertice ${verticePartida} no existe.`)
             return []
         }
+        if(visitados[0] === verticePartida && visitados.size >=3){
+            return true
+        }
+
         visitados.add(verticePartida)
         
         for (let adyacente of this.obtenerAdyacentes(verticePartida)){
-            if(visitados.has(adyacente) && visitados.size >=3 ){
-                return true
-            }
-            if(!visitados.has(adyacente)){
+            if(!visitados.has(adyacente) || (visitados[0] === adyacente && visitados.size >= 3)){
                 this.existeCiclo(adyacente,visitados)
             }
         }
@@ -293,16 +294,27 @@ class GrafoNoDirigido {
 
                         if (!visitados.has(adyacente) && peso < minPeso) {
                             minPeso = peso;
+                            console.log(`Arista candidata: ${v}-${adyacente} con peso ${peso}`);
                             minArista = new Arista(v, adyacente, peso);
                         }
                     }
                 }
-                console.log(`Arista seleccionada: ${minArista ? minArista.toString() : 'Ninguna'}`);
+
                 if (minArista) {
                     gres.insertarArco(minArista.v1, minArista.v2, minArista.coste);
+                    if (!gres.adjacentsList.has(minArista.v1)) {
+                        gres.insertarVertice(minArista.v1);
+                    }
+                    if (!gres.adjacentsList.has(minArista.v2)) {
+                        gres.insertarVertice(minArista.v2);
+                    }
+                    if(!visitados.has(minArista.v1)){
+                        visitados.add(minArista.v1);
+                    }
+                    if(!visitados.has(minArista.v2)){
 
-                    visitados.add(minArista.v1);
-                    visitados.add(minArista.v2);
+                        visitados.add(minArista.v2);
+                    }
                 } else {
                     break; // No hay más aristas para agregar
                 }
@@ -320,7 +332,6 @@ class GrafoNoDirigido {
             let arcosGuardados = gres.obtenerArcosUnicos()
             let aristaMinima = {}
             aristaMinima.coste = Infinity
-            console.log("Entra en el bucle")
             console.log(aristaMinima.coste)
             for (let arco of aristas){
                 for (let aristaVisitar of arcosGuardados){
@@ -341,6 +352,17 @@ class GrafoNoDirigido {
             
         }
         return gres
+    }
+
+    Floyd(){
+
+    }
+    Dijkstra(verticePartida){
+        if(!this.adjacentsList.has(verticePartida)) {
+            console.log(`El vértice ${verticePartida} no existe.`);
+            return [];
+        }
+
     }
 }
 
@@ -373,20 +395,15 @@ console.log(grafo.DFS('E')); // Debería realizar un recorrido DFS desde el vér
 
 console.log(grafo.BFS('D')); // Debería realizar un recorrido BFS desde el vértice A
 
+console.log("REALIZACION DE PRIM")
 const ArbolMinimo = grafo.Prim('A');
 console.log(ArbolMinimo.obtenerVertices()); // Debería mostrar los vértices del árbol mínimo
 console.log(ArbolMinimo.obtenerArcosFromVertice('B')); // Debería mostrar los arcos del árbol mínimo desde A
 
-ArbolMinimo.obtenerVertices().forEach(v =>{
-    const adyacentes = ArbolMinimo.obtenerAdyacentes(v);
-    adyacentes.forEach(vertice =>{
-        console.log(`Arista: ${v} - ${vertice}, Peso: ${ArbolMinimo.obtenerPeso(v, vertice)}`);
-    })
-})
 
 console.log(grafo.obtenerArcosUnicos())
 
-const Kruskal = grafo.Kruskal()
-const arcosUnicos = grafo.obtenerArcosUnicos()
-console.log(Kruskal.obtenerVertices())
-console.log(arcosUnicos)
+// const Kruskal = grafo.Kruskal()
+// const arcosUnicos = grafo.obtenerArcosUnicos()
+// console.log(Kruskal.obtenerVertices())
+// console.log(arcosUnicos)

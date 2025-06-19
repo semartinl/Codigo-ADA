@@ -386,6 +386,42 @@ constructor() {
         }
         return gres
     }
+
+    Dijkstra(verticePartida){
+        let distancias = []
+        for(let i = 0; i < this.Adj.length; i++){
+            distancias[i] = this.Adj[verticePartida][i]; // Inicializar todas las distancias a infinito
+        }
+        let visitados = new Set();
+        visitados.add(verticePartida)
+        distancias[verticePartida] = 0; // La distancia al vértice de partida es 0
+        while(visitados.size < this.Adj.length){
+            let minDistancia = Infinity;
+            let verticeMinimo = -1;
+
+            // Encontrar el vértice con la distancia mínima que no ha sido visitado
+            for(let i = 0; i < this.Adj.length; i++){
+                if(!visitados.has(i) && distancias[i] < minDistancia){
+                    minDistancia = distancias[i];
+                    verticeMinimo = i;
+                }
+            }
+
+            if(verticeMinimo === -1) break; // No hay más vértices para visitar
+
+            visitados.add(verticeMinimo);
+
+            // Actualizar las distancias a los vértices adyacentes
+            for(let j = 0; j < this.Adj.length; j++){
+                if(this.Adj[verticeMinimo][j] !== 0 && !visitados.has(j)){
+                    const nuevaDistancia = distancias[verticeMinimo] + this.Adj[verticeMinimo][j];
+                    distancias[j] = Math.min(distancias[j], nuevaDistancia);
+                }
+            }
+        }
+        return distancias;
+
+    }
 }
 
 const grafo = new GrafoNoDirigidoMatriz();
@@ -405,8 +441,10 @@ grafo.insertarArco('D', 'F', 6);
 grafo.insertarArco('E', 'F', 3);
 
 // grafo.insertarArco("A", "B")
-console.log(grafo.indiceToNombre.get(4))
+
 const cicloHamiltoniano = grafo.cicloHamiltoniano(0);
 console.log("Ciclo Hamiltoniano:", cicloHamiltoniano);
-console.log(grafo.obtenerMatrizAdyacencia());
-console.log(grafo.obtenerMatrizAdyacencia()[cicloHamiltoniano[0]][cicloHamiltoniano[cicloHamiltoniano.length - 1]] !== 0);
+// console.log(grafo.obtenerMatrizAdyacencia()[cicloHamiltoniano[0]][cicloHamiltoniano[cicloHamiltoniano.length - 1]] !== 0);
+
+let dijkstra = grafo.Dijkstra(0);
+console.log("Distancias desde el vértice A:", dijkstra);
