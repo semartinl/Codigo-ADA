@@ -29,7 +29,7 @@ function knapsackProblem(pesos, beneficios, cantidad){
 
     let resto = cantidad
     let i = 0
-    const {pesos: pesosOrdenados, beneficios: beneficiosOrdenados} = ordenarPorBeneficioPorPeso(pesos, beneficios);
+    const {pesos, beneficios} = ordenarPorBeneficioPorPeso(pesos, beneficios);
     
     while (i < n && pesos[i] <= resto) {
         resultados[i] = 1;

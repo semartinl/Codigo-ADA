@@ -105,6 +105,7 @@ constructor() {
                     const v1 = this.indiceToNombre.get(i);
                     const v2 = this.indiceToNombre.get(j);
                     const peso = this.Adj[i][j];
+                    const arista = new Arista(v1, v2, peso);
                     arcos.push({ v1, v2, peso });
                 }
             }
@@ -128,18 +129,6 @@ constructor() {
         return this.Adj
     }
 
-    obtenerArcos(){
-        const arcos = new Set()
-        this.vertices.forEach(vertice =>{
-            const adyacentes = this.obtenerArcosFromVertice(vertice)
-            adyacentes.forEach(adyacente =>{
-                if(!arcos.has(adyacente)){
-                    arcos.add(adyacente)
-                }
-            })
-        })
-        return arcos
-    }
 
     obtenerArcosUnicos() {
     const aristas = new Set();
@@ -164,19 +153,6 @@ constructor() {
             return Array.from(adyacentes.entries()).map(
                 ([v, peso]) => new Arista(vertice, v, peso)
             );
-        } else {
-            console.log(`El vértice ${vertice} no existe.`);
-            return [];
-        }
-    }
-
-    obtenerVertices() {
-        return Array.from(this.vertices);
-    }
-
-    obtenerAdyacentes(vertice) {
-        if (this.adjacentsList.has(vertice)) {
-            return Array.from(this.adjacentsList.get(vertice).keys());
         } else {
             console.log(`El vértice ${vertice} no existe.`);
             return [];
@@ -230,49 +206,7 @@ constructor() {
         this.vertices.clear();
     }
 
-    DFS(verticePartida, visitados = new Set()) {
-        if (!this.adjacentsList.has(verticePartida)) {
-            console.log(`El vértice ${verticePartida} no existe.`);
-            return [];
-        }
 
-        visitados.add(verticePartida);
-       
-        for (let adyacente of this.obtenerAdyacentes(verticePartida)) {
-            if (!visitados.has(adyacente)) {
-                console.log(`Visitando: ${adyacente} desde ${verticePartida}`);
-                this.DFS(adyacente, visitados);
-            }
-        }
-
-        return Array.from(visitados);
-    }
-
-    cicloHamiltoniano(verticePartida, visitados = new Set(), camino = []) {
-        const index = this.vertices.get(verticePartida);
-        visitados.add(verticePartida)
-        camino.push(verticePartida)
-
-        for(let i = 0; i < this.vertices.size; i++){
-            if(this.Adj[verticePartida][i] !== 0 && !visitados.has(i)){
-
-                if(camino.length === this.vertices.size){
-                    if(this.Adj[verticePartida][camino[0]] !== 0){
-                        return camino
-                    }
-                }
-                else{
-                    const resultado = this.cicloHamiltoniano(i, visitados, camino)
-                    if(resultado){
-                        return resultado
-                    }
-                }
-                visitados.delete(i)
-                camino.pop()
-            }
-        }
-        return []
-    }
     esConexo(){
         if (this.isEmpty()) {
             return true; // Un grafo vacío es conexo
@@ -294,134 +228,65 @@ constructor() {
 
     }
 
-    BFS(verticePartida, visitados = new Set()) {
-        if (!this.adjacentsList.has(verticePartida)) {
-            console.log(`El vértice ${verticePartida} no existe.`);
-            return [];
-        }
+    DFS(verticePartida, visitados = new Set()){
+        visitados.add(verticePartida)
 
-        const queue = [verticePartida];
-        visitados.add(verticePartida);
-        
-        while (queue.length > 0) {
-            const verticeAux = queue.shift();
-            console.log(`Visitando: ${verticeAux} desde ${verticePartida}`);
-            for (let adyacente of this.obtenerAdyacentes(verticeAux)) {
-                if (!visitados.has(adyacente)) {
-                    visitados.add(adyacente);
-                    queue.push(adyacente);
-                    
-                }
+        for(let i = 0; i < this.Adj.length; i++){
+            if(!visitados.has(i) && this.Adj[verticePartida][i]){
+                this.DFS(i, visitados)
             }
         }
-
-        return Array.from(visitados);
+        return visitados
     }
 
-    Prim(verticePartida){
-        if (!this.adjacentsList.has(verticePartida)) {
-            console.log(`El vértice ${verticePartida} no existe.`);
-            return [];
-        }
-        else{
-            const gres = new GrafoNoDirigido();
-            const visitados = new Set();
-            visitados.add(verticePartida);
-            gres.insertarVertice(verticePartida);
-            while (visitados.size < this.vertices.size) {
-                let minArista = null;
-                let minPeso = Infinity;
-
-                for (let v of visitados) {
-                    for (let [adyacente, peso] of this.adjacentsList.get(v).entries()) {
-
-                        if (!visitados.has(adyacente) && peso < minPeso) {
-                            minPeso = peso;
-                            minArista = new Arista(v, adyacente, peso);
-                        }
-                    }
-                }
-                console.log(`Arista seleccionada: ${minArista ? minArista.toString() : 'Ninguna'}`);
-                if (minArista) {
-                    gres.insertarArco(minArista.v1, minArista.v2, minArista.coste);
-
-                    visitados.add(minArista.v1);
-                    visitados.add(minArista.v2);
-                } else {
-                    break; // No hay más aristas para agregar
+    BFS(verticePartida, visitados = new Set()){
+        const siguientes = []
+        siguientes.push(verticePartida)
+        while(siguientes.length !== 0){
+            let vertice = siguientes.shift()
+            visitados.add(vertice)
+            for(let i = 0; i < this.Adj.length ; i++){
+                if(!visitados.has(i) && this.Adj[vertice][i]){
+                    siguientes.push(i)
                 }
             }
-            return gres;
+
         }
+        return visitados
     }
-    Kruskal(){
-
-        const gres = new GrafoNoDirigido();
-        this.vertices.forEach(v => gres.insertarVertice(v));
-        const aristas = this.obtenerArcosUnicos()
-
-        while(!gres.esConexo()){
-            let arcosGuardados = gres.obtenerArcosUnicos()
-            let aristaMinima = {}
-            aristaMinima.coste = Infinity
-            console.log("Entra en el bucle")
-            console.log(aristaMinima.coste)
-            for (let arco of aristas){
-                for (let aristaVisitar of arcosGuardados){
-                    if(!arcosGuardados.has(arco) && aristaMinima.coste > arco.coste){
-                        aristaMinima = arco
+    
+    Prim(verticePartida = 0){
+        const gres = new GrafoNoDirigidoMatriz()
+        const visitados = new Set()
+        visitados.add(verticePartida)
+        while(gres.vertices.size !== this.vertices.size){
+            let minPeso = Infinity
+            let minVertice = null
+            let minOrigen = null
+            let minArista = new Arista(null, null, Infinity)
+            for(let i = 0; i < visitados.size; i++){
+                let vertice = visitados[i]
+                for(let j = 0; j < this.Adj.length; j++){
+                    if(this.Adj[vertice][j]< minPeso && !visitados.has(j)){
+                        minPeso = this.Adj[vertice][j]
+                        minVertice = j
+                        minOrigen = vertice
                     }
                 }
             }
-            if(aristaMinima){
-                console.log(aristaMinima)
-                gres.insertarArco(aristaMinima.v1,aristaMinima.v2,aristaMinima.coste)
-
+            if(minPeso !== Infinity){
+                gres.insertarArco(minOrigen, minVertice, minPeso)
+                visitados.add(minVertice)
             }
             else{
                 break;
             }
-
-            
         }
         return gres
     }
 
-    Dijkstra(verticePartida){
-        let distancias = []
-        for(let i = 0; i < this.Adj.length; i++){
-            distancias[i] = this.Adj[verticePartida][i]; // Inicializar todas las distancias a infinito
-        }
-        let visitados = new Set();
-        visitados.add(verticePartida)
-        distancias[verticePartida] = 0; // La distancia al vértice de partida es 0
-        while(visitados.size < this.Adj.length){
-            let minDistancia = Infinity;
-            let verticeMinimo = -1;
 
-            // Encontrar el vértice con la distancia mínima que no ha sido visitado
-            for(let i = 0; i < this.Adj.length; i++){
-                if(!visitados.has(i) && distancias[i] < minDistancia){
-                    minDistancia = distancias[i];
-                    verticeMinimo = i;
-                }
-            }
 
-            if(verticeMinimo === -1) break; // No hay más vértices para visitar
-
-            visitados.add(verticeMinimo);
-
-            // Actualizar las distancias a los vértices adyacentes
-            for(let j = 0; j < this.Adj.length; j++){
-                if(this.Adj[verticeMinimo][j] !== 0 && !visitados.has(j)){
-                    const nuevaDistancia = distancias[verticeMinimo] + this.Adj[verticeMinimo][j];
-                    distancias[j] = Math.min(distancias[j], nuevaDistancia);
-                }
-            }
-        }
-        return distancias;
-
-    }
 }
 
 const grafo = new GrafoNoDirigidoMatriz();
@@ -440,11 +305,9 @@ grafo.insertarArco('D', 'E', 2);
 grafo.insertarArco('D', 'F', 6);
 grafo.insertarArco('E', 'F', 3);
 
-// grafo.insertarArco("A", "B")
+console.log(grafo.indiceToNombre.entries())
+console.log(grafo.DFS(3))
+console.log(grafo.BFS(3))
 
-const cicloHamiltoniano = grafo.cicloHamiltoniano(0);
-console.log("Ciclo Hamiltoniano:", cicloHamiltoniano);
-// console.log(grafo.obtenerMatrizAdyacencia()[cicloHamiltoniano[0]][cicloHamiltoniano[cicloHamiltoniano.length - 1]] !== 0);
-
-let dijkstra = grafo.Dijkstra(0);
-console.log("Distancias desde el vértice A:", dijkstra);
+const minimoPrim = grafo.Prim(0)
+console.log(minimoPrim.Adj)

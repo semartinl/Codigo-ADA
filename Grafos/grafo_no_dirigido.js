@@ -308,9 +308,6 @@ class GrafoNoDirigido {
                     if (!gres.adjacentsList.has(minArista.v2)) {
                         gres.insertarVertice(minArista.v2);
                     }
-                    if(!visitados.has(minArista.v1)){
-                        visitados.add(minArista.v1);
-                    }
                     if(!visitados.has(minArista.v2)){
 
                         visitados.add(minArista.v2);
@@ -330,8 +327,7 @@ class GrafoNoDirigido {
 
         while(!gres.esConexo()){
             let arcosGuardados = gres.obtenerArcosUnicos()
-            let aristaMinima = {}
-            aristaMinima.coste = Infinity
+            let aristaMinima = new Arista(null, null, Infinity);
             console.log(aristaMinima.coste)
             for (let arco of aristas){
                 for (let aristaVisitar of arcosGuardados){
